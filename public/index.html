@@ -19,6 +19,7 @@
                 <button id="btn-save" class="toolbar-btn" title="Save Layout">SAVE</button>
                 <button id="btn-load" class="toolbar-btn" title="Load Layout">LOAD</button>
                 <button id="btn-recent" class="toolbar-btn" title="Recent Layouts">RECENT</button>
+                <button id="btn-templates" class="toolbar-btn" title="Template Library">TEMPLATES</button>
                 <span class="toolbar-separator"></span>
                 <button id="btn-undo" class="toolbar-btn" title="Undo">UNDO</button>
                 <button id="btn-redo" class="toolbar-btn" title="Redo">REDO</button>
@@ -258,12 +259,27 @@
         </div>
     </div>
 
+    <!-- Template library modal -->
+    <div id="templates-modal" class="modal" style="display: none;">
+        <div class="modal-content templates-modal-content">
+            <div class="modal-header">
+                <span>TEMPLATE LIBRARY</span>
+                <button id="templates-modal-close" class="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="templates-tabs" id="templates-tabs"></div>
+                <div class="templates-grid" id="templates-grid"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- File load input (hidden) -->
     <input type="file" id="file-load-input" accept=".json,.lcars" style="display: none;">
 
     <script src="js/lcars-storage.js"></script>
     <script src="js/lcars-colors.js"></script>
     <script src="js/lcars-elements.js"></script>
+    <script src="js/lcars-templates.js"></script>
     <script src="js/canvas-renderer.js"></script>
     <script src="js/editor.js"></script>
     <script src="js/export.js"></script>
