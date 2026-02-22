@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LCARS UI Generator</title>
+    <link rel="stylesheet" href="css/lcars.css">
+    <link href="https://fonts.googleapis.com/css2?family=Antonio:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div id="app">
+        <!-- Top toolbar -->
+        <header id="toolbar">
+            <div class="toolbar-left">
+                <span class="app-title">LCARS UI GENERATOR</span>
+            </div>
+            <div class="toolbar-center">
+                <button id="btn-new" class="toolbar-btn" title="New Layout">NEW</button>
+                <button id="btn-save" class="toolbar-btn" title="Save Layout">SAVE</button>
+                <button id="btn-load" class="toolbar-btn" title="Load Layout">LOAD</button>
+                <button id="btn-recent" class="toolbar-btn" title="Recent Layouts">RECENT</button>
+                <span class="toolbar-separator"></span>
+                <button id="btn-undo" class="toolbar-btn" title="Undo">UNDO</button>
+                <button id="btn-redo" class="toolbar-btn" title="Redo">REDO</button>
+                <span class="toolbar-separator"></span>
+                <button id="btn-zoom-in" class="toolbar-btn" title="Zoom In">+</button>
+                <span id="zoom-level">100%</span>
+                <button id="btn-zoom-out" class="toolbar-btn" title="Zoom Out">−</button>
+                <button id="btn-zoom-fit" class="toolbar-btn" title="Fit to Window">FIT</button>
+            </div>
+            <div class="toolbar-right">
+                <button id="btn-share" class="toolbar-btn" title="Share Layout URL">SHARE</button>
+                <button id="btn-export" class="toolbar-btn accent" title="Export">EXPORT</button>
+                <button id="btn-help" class="toolbar-btn" title="Help">?</button>
+            </div>
+        </header>
+
+        <div id="main-content">
+            <!-- Left panel: Elements palette -->
+            <aside id="elements-panel">
+                <div class="panel-header">ELEMENTS</div>
+                <div id="element-categories">
+                    <!-- Populated by JS -->
+                </div>
+            </aside>
+
+            <!-- Center: Canvas workspace -->
+            <main id="canvas-workspace">
+                <!-- View-only banner (shared layouts) -->
+                <div id="viewonly-banner" style="display: none;">
+                    <span>VIEWING SHARED LAYOUT</span>
+                    <button id="btn-copy-to-editor" class="toolbar-btn accent">COPY TO EDITOR</button>
+                </div>
+                <!-- Tab lock banner -->
+                <div id="tablock-banner" style="display: none;">
+                    <span>EDITING IN ANOTHER TAB</span>
+                    <span class="tablock-sub">This tab is read-only</span>
+                    <button id="btn-take-control" class="toolbar-btn">TAKE CONTROL</button>
+                </div>
+                <div id="canvas-container">
+                    <canvas id="lcars-canvas"></canvas>
+                    <!-- Selection overlay for interaction -->
+                    <canvas id="interaction-canvas"></canvas>
+                </div>
+                <div id="canvas-info">
+                    <span id="mouse-pos">X: 0  Y: 0</span>
+                    <span id="canvas-size">280 × 240</span>
+                </div>
+            </main>
+
+            <!-- Right panel: Properties -->
+            <aside id="properties-panel">
+                <div class="panel-header">PROPERTIES</div>
+
+                <!-- Display settings (shown when nothing selected) -->
+                <div id="display-settings" class="prop-section">
+                    <div class="prop-section-title">DISPLAY</div>
+                    <div class="prop-row">
+                        <label>Width</label>
+                        <input type="number" id="display-width" value="280" min="64" max="1920">
+                    </div>
+                    <div class="prop-row">
+                        <label>Height</label>
+                        <input type="number" id="display-height" value="240" min="64" max="1080">
+                    </div>
+                    <div class="prop-row">
+                        <label>Corner Radius</label>
+                        <input type="number" id="display-corner-radius" value="20" min="0" max="100">
+                    </div>
+                    <div class="prop-row">
+                        <label>Background</label>
+                        <input type="color" id="display-bg-color" value="#000000">
+                    </div>
+                    <div class="prop-section-title">GRID</div>
+                    <div class="prop-row">
+                        <label>Show Grid</label>
+                        <input type="checkbox" id="show-grid" checked>
+                    </div>
+                    <div class="prop-row">
+                        <label>Grid Size</label>
+                        <input type="number" id="grid-size" value="10" min="1" max="50">
+                    </div>
+                    <div class="prop-row">
+                        <label>Snap to Grid</label>
+                        <input type="checkbox" id="snap-grid" checked>
+                    </div>
+                </div>
+
+                <!-- Element properties (shown when element selected) -->
+                <div id="element-properties" class="prop-section" style="display: none;">
+                    <div class="prop-section-title">ELEMENT</div>
+                    <div id="prop-fields">
+                        <!-- Populated dynamically -->
+                    </div>
+                    <div class="prop-section-title">POSITION</div>
+                    <div class="prop-row">
+                        <label>X</label>
+                        <input type="number" id="prop-x" value="0">
+                    </div>
+                    <div class="prop-row">
+                        <label>Y</label>
+                        <input type="number" id="prop-y" value="0">
+                    </div>
+                    <div class="prop-row">
+                        <label>Width</label>
+                        <input type="number" id="prop-w" value="0">
+                    </div>
+                    <div class="prop-row">
+                        <label>Height</label>
+                        <input type="number" id="prop-h" value="0">
+                    </div>
+                    <div class="prop-actions">
+                        <button id="btn-duplicate" class="prop-btn">DUPLICATE</button>
+                        <button id="btn-delete" class="prop-btn danger">DELETE</button>
+                        <button id="btn-to-front" class="prop-btn">TO FRONT</button>
+                        <button id="btn-to-back" class="prop-btn">TO BACK</button>
+                    </div>
+                </div>
+
+                <!-- Color theme section -->
+                <div id="theme-section" class="prop-section">
+                    <div class="prop-section-title">LCARS PALETTE</div>
+                    <div id="color-swatches">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Layers -->
+                <div id="layers-section" class="prop-section">
+                    <div class="prop-section-title">LAYERS</div>
+                    <div id="layers-list">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </aside>
+        </div>
+    </div>
+
+    <!-- Export modal -->
+    <div id="export-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>EXPORT</span>
+                <button id="modal-close" class="modal-close-btn">×</button>
+            </div>
+            <div class="modal-body">
+                <div class="export-options">
+                    <button id="export-cpp" class="export-btn">
+                        <span class="export-icon">{ }</span>
+                        <span class="export-label">C/C++ Header</span>
+                        <span class="export-desc">TFT_eSPI draw commands</span>
+                    </button>
+                    <button id="export-png" class="export-btn">
+                        <span class="export-icon">IMG</span>
+                        <span class="export-label">PNG Image</span>
+                        <span class="export-desc">Pre-rendered bitmap</span>
+                    </button>
+                    <button id="export-json" class="export-btn">
+                        <span class="export-icon">{ }</span>
+                        <span class="export-label">JSON Layout</span>
+                        <span class="export-desc">Structured layout data</span>
+                    </button>
+                </div>
+                <div id="export-preview" style="display: none;">
+                    <pre id="export-code"></pre>
+                    <div class="export-actions">
+                        <button id="export-copy" class="toolbar-btn accent">COPY</button>
+                        <button id="export-download" class="toolbar-btn accent">DOWNLOAD</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Welcome overlay -->
+    <div id="welcome-overlay" class="modal" style="display: none;">
+        <div class="welcome-content">
+            <div class="welcome-header">
+                <div class="welcome-bar"></div>
+                <h1>LCARS UI GENERATOR</h1>
+                <p class="welcome-subtitle">INTERFACE DESIGN SYSTEM</p>
+            </div>
+            <div class="welcome-body">
+                <div class="welcome-section">
+                    <h2>GETTING STARTED</h2>
+                    <ul>
+                        <li><strong>Drag elements</strong> from the left panel onto the canvas</li>
+                        <li><strong>Select an element</strong> to edit its properties on the right</li>
+                        <li><strong>Scroll</strong> to zoom, <strong>middle-click</strong> or <strong>Alt+click</strong> to pan</li>
+                        <li><strong>Resize the display</strong> in the properties panel when nothing is selected</li>
+                        <li><strong>Share</strong> your design with the SHARE button in the toolbar</li>
+                    </ul>
+                </div>
+                <div class="welcome-section">
+                    <h2>KEYBOARD SHORTCUTS</h2>
+                    <div class="welcome-shortcuts">
+                        <span class="shortcut-key">Delete</span><span>Remove element</span>
+                        <span class="shortcut-key">Ctrl+Z / Y</span><span>Undo / Redo</span>
+                        <span class="shortcut-key">Ctrl+D</span><span>Duplicate</span>
+                        <span class="shortcut-key">Ctrl+A</span><span>Select all</span>
+                        <span class="shortcut-key">Shift+Click</span><span>Toggle selection</span>
+                        <span class="shortcut-key">Arrows</span><span>Nudge (Shift = 10px)</span>
+                        <span class="shortcut-key">Escape</span><span>Deselect</span>
+                    </div>
+                </div>
+                <div class="welcome-section welcome-alpha">
+                    <h2>ALPHA NOTICE</h2>
+                    <p>This project is currently in <strong>alpha</strong>. More features are on the way and you may encounter bugs. If you find an issue or have a feature request, please report it on <a href="https://github.com/rablaine/LCARS-Generator/issues" target="_blank" rel="noopener">GitHub Issues</a>.</p>
+                </div>
+                <button id="welcome-dismiss" class="toolbar-btn accent welcome-engage">ENGAGE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LCARS confirm dialog -->
+    <div id="lcars-confirm" class="modal" style="display: none;">
+        <div class="modal-content confirm-content">
+            <div class="modal-header">
+                <span id="confirm-title">CONFIRM</span>
+            </div>
+            <div class="modal-body">
+                <p id="confirm-message"></p>
+                <div id="confirm-buttons" class="confirm-actions"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent layouts modal -->
+    <div id="recent-modal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span>RECENT LAYOUTS</span>
+                <button id="recent-modal-close" class="modal-close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="recent-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- File load input (hidden) -->
+    <input type="file" id="file-load-input" accept=".json,.lcars" style="display: none;">
+
+    <script src="js/lcars-storage.js"></script>
+    <script src="js/lcars-colors.js"></script>
+    <script src="js/lcars-elements.js"></script>
+    <script src="js/canvas-renderer.js"></script>
+    <script src="js/editor.js"></script>
+    <script src="js/export.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

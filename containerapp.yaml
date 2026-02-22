@@ -1,0 +1,21 @@
+properties:
+  template:
+    containers:
+      - name: lcars-generator
+        image: ghcr.io/rablaine/lcars-generator:latest
+        resources:
+          cpu: 0.25
+          memory: 0.5Gi
+        env:
+          - name: DB_PATH
+            value: /data/layouts.db
+        volumeMounts:
+          - volumeName: lcarsdata
+            mountPath: /data
+    volumes:
+      - name: lcarsdata
+        storageType: AzureFile
+        storageName: lcarsdata
+    scale:
+      minReplicas: 1
+      maxReplicas: 1

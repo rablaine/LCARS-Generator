@@ -1,0 +1,19 @@
+{
+  "name": "lcars-generator",
+  "version": "1.0.0",
+  "description": "Web-based LCARS UI visual editor for ESP8266 TFT displays",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "keywords": ["lcars", "star-trek", "esp8266", "tft", "ui-generator"],
+  "author": "rablaine",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.21.0",
+    "express-rate-limit": "^7.4.0",
+    "helmet": "^8.0.0",
+    "sql.js": "^1.11.0"
+  }
+}
