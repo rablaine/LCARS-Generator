@@ -854,3 +854,117 @@ body {
     pointer-events: none;
     opacity: 0.5;
 }
+
+/* ── Template Library Modal ── */
+.templates-modal-content {
+    width: 820px;
+    max-width: 92vw;
+    max-height: 85vh;
+}
+
+.templates-tabs {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.templates-tab {
+    background: var(--bg-panel-header);
+    border: 2px solid transparent;
+    color: var(--text-secondary);
+    font-family: 'Antonio', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    padding: 6px 16px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.templates-tab:hover {
+    color: var(--text-primary);
+    border-color: var(--lcars-orange);
+}
+
+.templates-tab.active {
+    background: var(--lcars-orange);
+    color: #000;
+    border-color: var(--lcars-orange);
+}
+
+.templates-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+    gap: 14px;
+}
+
+.template-card {
+    background: var(--bg-panel-header);
+    border: 2px solid #333;
+    border-radius: 12px;
+    padding: 14px;
+    cursor: pointer;
+    transition: border-color 0.15s, transform 0.1s;
+}
+
+.template-card:hover {
+    border-color: var(--lcars-orange);
+    transform: translateY(-2px);
+}
+
+.template-card-name {
+    color: var(--lcars-orange);
+    font-family: 'Antonio', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    margin-bottom: 4px;
+}
+
+.template-card-size {
+    color: var(--text-secondary);
+    font-size: 12px;
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+}
+
+.template-card-desc {
+    color: var(--text-muted);
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.template-card-preview {
+    width: 100%;
+    height: 100px;
+    background: #000;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.template-card-preview canvas {
+    max-width: 100%;
+    max-height: 100%;
+}
+
+/* Screen preset cards */
+.template-card.preset-card {
+    text-align: center;
+    padding: 20px 14px;
+}
+
+.preset-card .template-card-name {
+    font-size: 20px;
+    margin-bottom: 6px;
+}
+
+.preset-card .template-card-desc {
+    color: var(--text-secondary);
+    font-size: 12px;
+}

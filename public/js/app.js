@@ -907,6 +907,166 @@
         }
     });
 
+    // ───── Template Library ─────
+
+    function renderTemplateThumbnail(templateData, canvas) {
+        const ctx = canvas.getContext('2d');
+        const dw = templateData.display.width;
+        const dh = templateData.display.height;
+        const maxW = canvas.parentElement.clientWidth || 200;
+        const maxH = 100;
+        const scale = Math.min(maxW / dw, maxH / dh, 1);
+        canvas.width = Math.round(dw * scale);
+        canvas.height = Math.round(dh * scale);
+        ctx.scale(scale, scale);
+
+        // Draw background
+        ctx.fillStyle = templateData.display.bgColor || '#000000';
+        ctx.fillRect(0, 0, dw, dh);
+
+        // Draw each element using the element type definitions
+        for (const el of templateData.elements) {
+            if (!el.visible) continue;
+            const typeDef = LCARSElementTypes[el.type];
+            if (typeDef && typeDef.render) {
+                ctx.save();
+                try {
+                    typeDef.render(ctx, el.props);
+                } catch (e) {
+                    // Skip elements that fail to render in thumbnail
+                }
+                ctx.restore();
+            }
+        }
+    }
+
+    function showTemplates(filterCategory) {
+        const modal = document.getElementById('templates-modal');
+        const tabsContainer = document.getElementById('templates-tabs');
+        const grid = document.getElementById('templates-grid');
+
+        // Build category list: "All", "Screen Presets", then template categories
+        const templateCategories = [...new Set(LCARS_TEMPLATES.map(t => t.category))];
+        const allCategories = ['All', ...templateCategories, 'Blank Canvas'];
+        const activeCategory = filterCategory || 'All';
+
+        // Render tabs
+        tabsContainer.innerHTML = '';
+        for (const cat of allCategories) {
+            const tab = document.createElement('button');
+            tab.className = 'templates-tab' + (cat === activeCategory ? ' active' : '');
+            tab.textContent = cat.toUpperCase();
+            tab.addEventListener('click', () => showTemplates(cat));
+            tabsContainer.appendChild(tab);
+        }
+
+        // Render grid
+        grid.innerHTML = '';
+
+        if (activeCategory === 'Blank Canvas') {
+            // Show screen size presets
+            for (const preset of LCARS_SCREEN_PRESETS) {
+                const card = document.createElement('div');
+                card.className = 'template-card preset-card';
+                card.innerHTML = `
+                    <div class="template-card-name">${preset.name}</div>
+                    <div class="template-card-desc">${preset.category}</div>
+                `;
+                card.addEventListener('click', async () => {
+                    modal.style.display = 'none';
+                    if (renderer.elements.length > 0) {
+                        const result = await lcarsConfirm({
+                            title: 'LOAD PRESET',
+                            message: 'This will clear your current layout. Continue?',
+                            buttons: [
+                                { key: 'yes', label: 'CONTINUE', danger: true },
+                                { key: 'cancel', label: 'CANCEL' },
+                            ]
+                        });
+                        if (result !== 'yes') return;
+                    }
+                    const blankLayout = {
+                        display: { width: preset.width, height: preset.height, cornerRadius: 20, bgColor: '#000000' },
+                        elements: []
+                    };
+                    editor.loadLayout(blankLayout);
+                    syncDisplaySettings();
+                    updateLayers();
+                    LCARSStorage.clearAutosave();
+                });
+                grid.appendChild(card);
+            }
+        } else {
+            // Show templates
+            const filtered = activeCategory === 'All'
+                ? LCARS_TEMPLATES
+                : LCARS_TEMPLATES.filter(t => t.category === activeCategory);
+
+            for (const template of filtered) {
+                const card = document.createElement('div');
+                card.className = 'template-card';
+
+                const previewDiv = document.createElement('div');
+                previewDiv.className = 'template-card-preview';
+                const thumbCanvas = document.createElement('canvas');
+                previewDiv.appendChild(thumbCanvas);
+
+                card.innerHTML = '';
+                card.appendChild(previewDiv);
+
+                const info = document.createElement('div');
+                info.innerHTML = `
+                    <div class="template-card-name">${template.name}</div>
+                    <div class="template-card-size">${template.size}</div>
+                    <div class="template-card-desc">${template.description}</div>
+                `;
+                card.appendChild(info);
+
+                card.addEventListener('click', async () => {
+                    modal.style.display = 'none';
+                    if (renderer.elements.length > 0) {
+                        const result = await lcarsConfirm({
+                            title: 'LOAD TEMPLATE',
+                            message: `Load "${template.name}"? This will replace your current layout.`,
+                            buttons: [
+                                { key: 'yes', label: 'LOAD', danger: true },
+                                { key: 'cancel', label: 'CANCEL' },
+                            ]
+                        });
+                        if (result !== 'yes') return;
+                    }
+                    // Deep clone the template data
+                    const layoutData = JSON.parse(JSON.stringify(template.data));
+                    editor.loadLayout(layoutData);
+                    syncDisplaySettings();
+                    updateLayers();
+                    LCARSStorage.clearAutosave();
+                });
+
+                grid.appendChild(card);
+
+                // Render thumbnail after card is in DOM
+                requestAnimationFrame(() => {
+                    renderTemplateThumbnail(template.data, thumbCanvas);
+                });
+            }
+        }
+
+        modal.style.display = '';
+    }
+
+    document.getElementById('btn-templates').addEventListener('click', () => showTemplates());
+
+    document.getElementById('templates-modal-close').addEventListener('click', () => {
+        document.getElementById('templates-modal').style.display = 'none';
+    });
+
+    document.getElementById('templates-modal').addEventListener('click', (e) => {
+        if (e.target.id === 'templates-modal') {
+            document.getElementById('templates-modal').style.display = 'none';
+        }
+    });
+
     // ───── View Mode (shared layouts) ─────
 
     async function initViewMode(layoutId) {
