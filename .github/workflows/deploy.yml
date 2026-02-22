@@ -64,7 +64,9 @@ jobs:
         uses: azure/cli@v2
         with:
           inlineScript: |
+            SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
             az containerapp update \
               --name ${{ secrets.CONTAINER_APP_NAME }} \
               --resource-group ${{ secrets.RESOURCE_GROUP }} \
-              --image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+              --image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:sha-${SHORT_SHA} \
+              --revision-suffix sha-${SHORT_SHA}
