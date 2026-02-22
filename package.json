@@ -1,6 +1,6 @@
 {
   "name": "lcars-generator",
-  "version": "1.0.0",
+  "version": "0.2.0-alpha",
   "description": "Web-based LCARS UI visual editor for ESP8266 TFT displays",
   "main": "server.js",
   "scripts": {

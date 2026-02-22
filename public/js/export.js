@@ -629,7 +629,7 @@ class Exporter {
     exportJson() {
         const layout = {
             generator: 'LCARS UI Generator',
-            version: '1.0.0',
+            version: '0.2.0-alpha',
             display: {
                 width: this.renderer.displayWidth,
                 height: this.renderer.displayHeight,
