@@ -44,63 +44,71 @@ function drawElbow(ctx, x, y, w, h, color, corner, barW, barH, outerR, innerR) {
     const oR = outerR != null ? Math.max(0, Math.min(outerR, w, h)) : Math.min(barH, barW, w, h);
     const iR = innerR != null ? Math.max(0, Math.min(innerR, w - barW, h - barH)) : 0;
 
+    // Sub-pixel overlap on straight arm ends to eliminate anti-aliasing
+    // seams when adjacent elements share an edge
+    const ov = 0.5;
+
     ctx.beginPath();
     switch (corner) {
         case 'tl':
-            ctx.moveTo(x, y + h);
+            // Top arm extends right (+ov), vert arm extends down (+ov)
+            ctx.moveTo(x, y + h + ov);
             ctx.lineTo(x, y + oR);
             ctx.arcTo(x, y, x + oR, y, oR);
-            ctx.lineTo(x + w, y);
-            ctx.lineTo(x + w, y + barH);
+            ctx.lineTo(x + w + ov, y);
+            ctx.lineTo(x + w + ov, y + barH);
             if (iR > 0) {
                 ctx.lineTo(x + barW + iR, y + barH);
                 ctx.arcTo(x + barW, y + barH, x + barW, y + barH + iR, iR);
             } else {
                 ctx.lineTo(x + barW, y + barH);
             }
-            ctx.lineTo(x + barW, y + h);
+            ctx.lineTo(x + barW, y + h + ov);
             break;
         case 'tr':
-            ctx.moveTo(x, y);
+            // Top arm extends left (-ov), vert arm extends down (+ov)
+            ctx.moveTo(x - ov, y);
             ctx.lineTo(x + w - oR, y);
             ctx.arcTo(x + w, y, x + w, y + oR, oR);
-            ctx.lineTo(x + w, y + h);
-            ctx.lineTo(x + w - barW, y + h);
+            ctx.lineTo(x + w, y + h + ov);
+            ctx.lineTo(x + w - barW, y + h + ov);
             if (iR > 0) {
                 ctx.lineTo(x + w - barW, y + barH + iR);
                 ctx.arcTo(x + w - barW, y + barH, x + w - barW - iR, y + barH, iR);
             } else {
                 ctx.lineTo(x + w - barW, y + barH);
             }
-            ctx.lineTo(x, y + barH);
+            ctx.lineTo(x - ov, y + barH);
             break;
         case 'bl':
-            ctx.moveTo(x, y);
-            ctx.lineTo(x + barW, y);
+            // Vert arm extends up (-ov), bottom arm extends right (+ov)
+            ctx.moveTo(x, y - ov);
+            ctx.lineTo(x + barW, y - ov);
             if (iR > 0) {
                 ctx.lineTo(x + barW, y + h - barH - iR);
                 ctx.arcTo(x + barW, y + h - barH, x + barW + iR, y + h - barH, iR);
             } else {
                 ctx.lineTo(x + barW, y + h - barH);
             }
-            ctx.lineTo(x + w, y + h - barH);
-            ctx.lineTo(x + w, y + h);
+            ctx.lineTo(x + w + ov, y + h - barH);
+            ctx.lineTo(x + w + ov, y + h);
             ctx.lineTo(x + oR, y + h);
             ctx.arcTo(x, y + h, x, y + h - oR, oR);
             break;
         case 'br':
-            ctx.moveTo(x + w, y);
+            // Vert arm extends up (-ov), bottom arm extends left (-ov)
+            ctx.moveTo(x + w, y - ov);
             ctx.lineTo(x + w, y + h - oR);
             ctx.arcTo(x + w, y + h, x + w - oR, y + h, oR);
-            ctx.lineTo(x, y + h);
-            ctx.lineTo(x, y + h - barH);
+            ctx.lineTo(x - ov, y + h);
+            ctx.lineTo(x - ov, y + h - barH);
             if (iR > 0) {
                 ctx.lineTo(x + w - barW - iR, y + h - barH);
                 ctx.arcTo(x + w - barW, y + h - barH, x + w - barW, y + h - barH - iR, iR);
             } else {
                 ctx.lineTo(x + w - barW, y + h - barH);
             }
-            ctx.lineTo(x + w - barW, y);
+            ctx.lineTo(x + w - barW, y - ov);
             break;
     }
     ctx.closePath();
@@ -297,7 +305,10 @@ LCARSElementTypes['bar-horizontal'] = {
         const hr = bh / 2;
         const rl = p.endCapLeft === 'round' ? hr : 0;
         const rr = p.endCapRight === 'round' ? hr : 0;
-        roundedRectPath(ctx, bx, by, bw, bh, { tl: rl, bl: rl, tr: rr, br: rr });
+        // Sub-pixel overlap on flat ends to eliminate seams with adjacent elements
+        const ovL = rl === 0 ? 0.5 : 0;
+        const ovR = rr === 0 ? 0.5 : 0;
+        roundedRectPath(ctx, bx - ovL, by, bw + ovL + ovR, bh, { tl: rl, bl: rl, tr: rr, br: rr });
         ctx.fill();
     },
     getProperties() {
@@ -335,7 +346,10 @@ LCARSElementTypes['bar-vertical'] = {
         const hr = bw / 2;
         const rt = p.endCapTop === 'round' ? hr : 0;
         const rb = p.endCapBottom === 'round' ? hr : 0;
-        roundedRectPath(ctx, bx, by, bw, bh, { tl: rt, tr: rt, bl: rb, br: rb });
+        // Sub-pixel overlap on flat ends to eliminate seams with adjacent elements
+        const ovT = rt === 0 ? 0.5 : 0;
+        const ovB = rb === 0 ? 0.5 : 0;
+        roundedRectPath(ctx, bx, by - ovT, bw, bh + ovT + ovB, { tl: rt, tr: rt, bl: rb, br: rb });
         ctx.fill();
     },
     getProperties() {
