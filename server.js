@@ -57,6 +57,7 @@ app.use(helmet({
             connectSrc: ["'self'"],
         },
     },
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
 }));
 
 // CORS — restrict to our domain in production

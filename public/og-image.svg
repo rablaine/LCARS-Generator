@@ -1,11 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
-  <defs>
-    <style>
-      @import url('https://fonts.googleapis.com/css2?family=Antonio:wght@400;700');
-      text { font-family: 'Antonio', Arial, sans-serif; }
-    </style>
-  </defs>
-
   <!-- Background -->
   <rect width="1200" height="630" fill="#0A0A1A"/>
 
@@ -33,10 +26,10 @@
   <rect x="60" y="60" width="1080" height="510" rx="4" fill="#0D0D24" opacity="0.8"/>
 
   <!-- Title text -->
-  <text x="600" y="260" text-anchor="middle" fill="#FF9900" font-size="72" font-weight="700" letter-spacing="6">LCARS GENERATOR</text>
+  <text x="600" y="260" text-anchor="middle" fill="#FF9900" font-size="72" font-weight="700" font-family="Arial, Helvetica, sans-serif" letter-spacing="6">LCARS GENERATOR</text>
 
   <!-- Subtitle -->
-  <text x="600" y="320" text-anchor="middle" fill="#CC99CC" font-size="28" font-weight="400" letter-spacing="4">VISUAL LAYOUT EDITOR</text>
+  <text x="600" y="320" text-anchor="middle" fill="#CC99CC" font-size="28" font-weight="400" font-family="Arial, Helvetica, sans-serif" letter-spacing="4">VISUAL LAYOUT EDITOR</text>
 
   <!-- Decorative scan lines -->
   <rect x="200" y="370" width="120" height="8" rx="4" fill="#FFCC66"/>
@@ -52,5 +45,5 @@
   <rect x="720" y="420" width="180" height="6" rx="3" fill="#CC99CC" opacity="0.5"/>
 
   <!-- URL text -->
-  <text x="600" y="480" text-anchor="middle" fill="#6688CC" font-size="22" font-weight="400" letter-spacing="2">lcars.techier.net</text>
+  <text x="600" y="480" text-anchor="middle" fill="#6688CC" font-size="22" font-weight="400" font-family="Arial, Helvetica, sans-serif" letter-spacing="2">lcars.techier.net</text>
 </svg>
