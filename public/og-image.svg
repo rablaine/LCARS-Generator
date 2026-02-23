@@ -1,0 +1,56 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630">
+  <defs>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Antonio:wght@400;700');
+      text { font-family: 'Antonio', Arial, sans-serif; }
+    </style>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#0A0A1A"/>
+
+  <!-- Top-left elbow -->
+  <path d="M0 200 L0 50 Q0 0 50 0 L700 0 L700 40 L80 40 Q40 40 40 80 L40 200 Z" fill="#FFCC66"/>
+  <!-- Top-right elbow -->
+  <path d="M1200 200 L1200 50 Q1200 0 1150 0 L730 0 L730 40 L1120 40 Q1160 40 1160 80 L1160 200 Z" fill="#CC99CC"/>
+
+  <!-- Left sidebar -->
+  <rect x="0" y="210" width="40" height="200" fill="#FF9900"/>
+  <!-- Right sidebar -->
+  <rect x="1160" y="210" width="40" height="200" fill="#9977AA"/>
+
+  <!-- Bottom-left elbow -->
+  <path d="M0 420 L40 420 L40 550 Q40 590 80 590 L700 590 L700 630 L50 630 Q0 630 0 580 Z" fill="#FF9900"/>
+  <!-- Bottom-right elbow -->
+  <path d="M1200 420 L1160 420 L1160 550 Q1160 590 1120 590 L730 590 L730 630 L1150 630 Q1200 630 1200 580 Z" fill="#CC99CC"/>
+
+  <!-- Bottom bar left -->
+  <rect x="80" y="590" width="620" height="40" fill="#FFCC66"/>
+  <!-- Bottom bar right -->
+  <rect x="730" y="590" width="390" height="40" fill="#9977AA"/>
+
+  <!-- Center content area -->
+  <rect x="60" y="60" width="1080" height="510" rx="4" fill="#0D0D24" opacity="0.8"/>
+
+  <!-- Title text -->
+  <text x="600" y="260" text-anchor="middle" fill="#FF9900" font-size="72" font-weight="700" letter-spacing="6">LCARS GENERATOR</text>
+
+  <!-- Subtitle -->
+  <text x="600" y="320" text-anchor="middle" fill="#CC99CC" font-size="28" font-weight="400" letter-spacing="4">VISUAL LAYOUT EDITOR</text>
+
+  <!-- Decorative scan lines -->
+  <rect x="200" y="370" width="120" height="8" rx="4" fill="#FFCC66"/>
+  <rect x="340" y="370" width="80" height="8" rx="4" fill="#FF9900"/>
+  <rect x="440" y="370" width="160" height="8" rx="4" fill="#9977AA"/>
+  <rect x="620" y="370" width="60" height="8" rx="4" fill="#CC99CC"/>
+  <rect x="700" y="370" width="140" height="8" rx="4" fill="#FFCC66"/>
+  <rect x="860" y="370" width="100" height="8" rx="4" fill="#FF9900"/>
+
+  <!-- Small accent elements -->
+  <rect x="280" y="420" width="200" height="6" rx="3" fill="#9977AA" opacity="0.5"/>
+  <rect x="520" y="420" width="160" height="6" rx="3" fill="#FFCC66" opacity="0.5"/>
+  <rect x="720" y="420" width="180" height="6" rx="3" fill="#CC99CC" opacity="0.5"/>
+
+  <!-- URL text -->
+  <text x="600" y="480" text-anchor="middle" fill="#6688CC" font-size="22" font-weight="400" letter-spacing="2">lcars.techier.net</text>
+</svg>

@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- LCARS elbow shape favicon -->
+  <!-- Outer elbow (butterscotch) -->
+  <path d="M0 32 L0 8 Q0 0 8 0 L32 0 L32 6 L12 6 Q6 6 6 12 L6 32 Z" fill="#FFCC66"/>
+  <!-- Inner content area (dark background) -->
+  <path d="M10 32 L10 14 Q10 10 14 10 L32 10 L32 32 Z" fill="#1A1A2E"/>
+  <!-- Accent bar (orange) -->
+  <rect x="14" y="14" width="14" height="3" rx="1.5" fill="#FF9900"/>
+  <!-- Accent dot (lavender) -->
+  <circle cx="17" cy="22" r="2" fill="#CC99CC"/>
+  <circle cx="24" cy="22" r="2" fill="#9977AA"/>
+</svg>
