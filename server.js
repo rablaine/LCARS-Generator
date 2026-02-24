@@ -9,6 +9,9 @@ const rateLimit = require('express-rate-limit');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// Trust reverse proxy (Azure Container Apps) for correct protocol/IP
+app.set('trust proxy', true);
+
 // --- Database setup ---
 const DB_PATH = process.env.DB_PATH || path.join(__dirname, 'data', 'layouts.db');
 fs.mkdirSync(path.dirname(DB_PATH), { recursive: true });
@@ -34,6 +37,14 @@ async function initDB() {
             size_bytes INTEGER
         )
     `);
+
+    // Add thumbnail column if it doesn't exist
+    try {
+        db.run('ALTER TABLE layouts ADD COLUMN thumbnail BLOB');
+    } catch (e) {
+        // Column already exists
+    }
+
     saveDB();
 }
 
@@ -69,8 +80,8 @@ app.use((req, res, next) => {
     next();
 });
 
-// Body parsing with size limit
-app.use(express.json({ limit: '50kb' }));
+// Body parsing with size limit (raised for OG thumbnail data URLs)
+app.use(express.json({ limit: '2mb' }));
 
 // Rate limiting for layout saves
 const saveLimiter = rateLimit({
@@ -79,6 +90,49 @@ const saveLimiter = rateLimit({
     standardHeaders: true,
     legacyHeaders: false,
     message: { error: 'Too many saves. Please try again later.' },
+});
+
+// --- Dynamic OG tags for shared layouts (must precede static middleware) ---
+app.get('/', (req, res, next) => {
+    const layoutId = req.query.layout;
+    if (!layoutId || !/^[a-zA-Z0-9]+$/.test(layoutId)) {
+        return next(); // Fall through to static index.html
+    }
+
+    // Read index.html and inject layout-specific OG tags
+    const indexPath = path.join(__dirname, 'public', 'index.html');
+    fs.readFile(indexPath, 'utf8', (err, html) => {
+        if (err) return next();
+
+        const baseUrl = `${req.protocol}://${req.get('host')}`;
+        const ogImageUrl = `${baseUrl}/api/layouts/${layoutId}/og-image.png`;
+        const pageUrl = `${baseUrl}/?layout=${layoutId}`;
+
+        // Replace OG meta tags with layout-specific values
+        html = html.replace(
+            /<meta property="og:image" content="[^"]*">/,
+            `<meta property="og:image" content="${ogImageUrl}">`
+        );
+        html = html.replace(
+            /<meta property="og:url" content="[^"]*">/,
+            `<meta property="og:url" content="${pageUrl}">`
+        );
+        html = html.replace(
+            /<meta name="twitter:image" content="[^"]*">/,
+            `<meta name="twitter:image" content="${ogImageUrl}">`
+        );
+        html = html.replace(
+            /<meta property="og:title" content="[^"]*">/,
+            `<meta property="og:title" content="LCARS Layout — ${layoutId}">`
+        );
+        html = html.replace(
+            /<meta name="twitter:title" content="[^"]*">/,
+            `<meta name="twitter:title" content="LCARS Layout — ${layoutId}">`
+        );
+
+        res.set('Content-Type', 'text/html');
+        res.send(html);
+    });
 });
 
 // --- Static files ---
@@ -96,12 +150,22 @@ app.post('/api/layouts', saveLimiter, (req, res) => {
             return res.status(400).json({ error: 'Invalid layout format. Expected { elements: [...] }' });
         }
 
+        // Extract and remove thumbnail from layout data before storing
+        let thumbnailBuf = null;
+        if (data.thumbnail && typeof data.thumbnail === 'string') {
+            const match = data.thumbnail.match(/^data:image\/png;base64,(.+)$/);
+            if (match) {
+                thumbnailBuf = Buffer.from(match[1], 'base64');
+            }
+            delete data.thumbnail;
+        }
+
         const json = JSON.stringify(data);
         const id = generateId();
         const ipHash = hashIP(req.ip || req.connection.remoteAddress || 'unknown');
 
-        db.run('INSERT INTO layouts (id, data, ip_hash, size_bytes) VALUES (?, ?, ?, ?)',
-            [id, json, ipHash, Buffer.byteLength(json, 'utf8')]);
+        db.run('INSERT INTO layouts (id, data, ip_hash, size_bytes, thumbnail) VALUES (?, ?, ?, ?, ?)',
+            [id, json, ipHash, Buffer.byteLength(json, 'utf8'), thumbnailBuf]);
         saveDB();
 
         res.json({ id });
@@ -135,6 +199,36 @@ app.get('/api/layouts/:id', (req, res) => {
     } catch (err) {
         console.error('Error loading layout:', err.message);
         res.status(500).json({ error: 'Failed to load layout.' });
+    }
+});
+
+// Serve OG thumbnail for a shared layout
+app.get('/api/layouts/:id/og-image.png', (req, res) => {
+    const id = req.params.id;
+    if (!/^[a-zA-Z0-9]+$/.test(id)) {
+        return res.status(400).send('Invalid ID');
+    }
+    try {
+        const stmt = db.prepare('SELECT thumbnail FROM layouts WHERE id = ?');
+        stmt.bind([id]);
+        if (stmt.step()) {
+            const row = stmt.getAsObject();
+            stmt.free();
+            if (row.thumbnail) {
+                res.set('Content-Type', 'image/png');
+                res.set('Cache-Control', 'public, max-age=31536000, immutable');
+                res.send(Buffer.from(row.thumbnail));
+            } else {
+                // No thumbnail — redirect to default OG image
+                res.redirect('/og-image.png');
+            }
+        } else {
+            stmt.free();
+            res.redirect('/og-image.png');
+        }
+    } catch (err) {
+        console.error('Error serving OG image:', err.message);
+        res.redirect('/og-image.png');
     }
 });
 

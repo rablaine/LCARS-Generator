@@ -573,6 +573,65 @@
     });
 
     // ───── Share ─────
+    function generateOGThumbnail(layout) {
+        // Render the layout to a 1200x630 OG-sized canvas
+        const ogW = 1200, ogH = 630;
+        const offscreen = document.createElement('canvas');
+        offscreen.width = ogW;
+        offscreen.height = ogH;
+        const ctx = offscreen.getContext('2d');
+
+        const dw = layout.display.width;
+        const dh = layout.display.height;
+
+        // Center the layout within the OG frame with padding
+        const pad = 40;
+        const availW = ogW - pad * 2;
+        const availH = ogH - pad * 2;
+        const scale = Math.min(availW / dw, availH / dh);
+        const scaledW = dw * scale;
+        const scaledH = dh * scale;
+        const offsetX = (ogW - scaledW) / 2;
+        const offsetY = (ogH - scaledH) / 2;
+
+        // Dark background
+        ctx.fillStyle = '#0A0A1A';
+        ctx.fillRect(0, 0, ogW, ogH);
+
+        // Translate and scale to draw the layout centered
+        ctx.save();
+        ctx.translate(offsetX, offsetY);
+        ctx.scale(scale, scale);
+
+        // Layout background
+        ctx.fillStyle = layout.display.bgColor || '#000000';
+        if (layout.display.cornerRadius > 0) {
+            roundedRectPath(ctx, 0, 0, dw, dh, layout.display.cornerRadius);
+            ctx.fill();
+            ctx.save();
+            roundedRectPath(ctx, 0, 0, dw, dh, layout.display.cornerRadius);
+            ctx.clip();
+        } else {
+            ctx.fillRect(0, 0, dw, dh);
+            ctx.save();
+        }
+
+        // Draw elements
+        for (const el of layout.elements) {
+            if (el.visible === false) continue;
+            const typeDef = LCARSElementTypes[el.type];
+            if (typeDef && typeDef.render) {
+                ctx.save();
+                try { typeDef.render(ctx, el.props); } catch (e) { /* skip */ }
+                ctx.restore();
+            }
+        }
+        ctx.restore(); // clip
+        ctx.restore(); // translate+scale
+
+        return offscreen.toDataURL('image/png');
+    }
+
     document.getElementById('btn-share').addEventListener('click', async () => {
         const layout = editor.getLayout();
         if (!layout.elements.length) {
@@ -583,10 +642,13 @@
         btn.textContent = '...';
         btn.disabled = true;
         try {
+            // Generate OG thumbnail
+            const thumbnail = generateOGThumbnail(layout);
+
             const res = await fetch('/api/layouts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(layout),
+                body: JSON.stringify({ ...layout, thumbnail }),
             });
             if (!res.ok) {
                 const err = await res.json().catch(() => ({}));
