@@ -574,8 +574,8 @@
 
     // ───── Share ─────
     function generateOGThumbnail(layout) {
-        // Render the layout to a 1200x630 OG-sized canvas
-        const ogW = 1200, ogH = 630;
+        // Render the layout to a 600x315 canvas (half OG Size, scaled up by scrapers)
+        const ogW = 600, ogH = 315;
         const offscreen = document.createElement('canvas');
         offscreen.width = ogW;
         offscreen.height = ogH;
@@ -585,7 +585,7 @@
         const dh = layout.display.height;
 
         // Center the layout within the OG frame with padding
-        const pad = 40;
+        const pad = 20;
         const availW = ogW - pad * 2;
         const availH = ogH - pad * 2;
         const scale = Math.min(availW / dw, availH / dh);
@@ -629,7 +629,7 @@
         ctx.restore(); // clip
         ctx.restore(); // translate+scale
 
-        return offscreen.toDataURL('image/png');
+        return offscreen.toDataURL('image/jpeg', 0.85);
     }
 
     document.getElementById('btn-share').addEventListener('click', async () => {

@@ -80,8 +80,8 @@ app.use((req, res, next) => {
     next();
 });
 
-// Body parsing with size limit (raised for OG thumbnail data URLs)
-app.use(express.json({ limit: '2mb' }));
+// Body parsing with size limit (includes base64 OG thumbnail)
+app.use(express.json({ limit: '500kb' }));
 
 // Rate limiting for layout saves
 const saveLimiter = rateLimit({
@@ -153,9 +153,9 @@ app.post('/api/layouts', saveLimiter, (req, res) => {
         // Extract and remove thumbnail from layout data before storing
         let thumbnailBuf = null;
         if (data.thumbnail && typeof data.thumbnail === 'string') {
-            const match = data.thumbnail.match(/^data:image\/png;base64,(.+)$/);
+            const match = data.thumbnail.match(/^data:image\/(png|jpeg);base64,(.+)$/);
             if (match) {
-                thumbnailBuf = Buffer.from(match[1], 'base64');
+                thumbnailBuf = Buffer.from(match[2], 'base64');
             }
             delete data.thumbnail;
         }
@@ -215,7 +215,7 @@ app.get('/api/layouts/:id/og-image.png', (req, res) => {
             const row = stmt.getAsObject();
             stmt.free();
             if (row.thumbnail) {
-                res.set('Content-Type', 'image/png');
+                res.set('Content-Type', 'image/jpeg');
                 res.set('Cache-Control', 'public, max-age=31536000, immutable');
                 res.send(Buffer.from(row.thumbnail));
             } else {
